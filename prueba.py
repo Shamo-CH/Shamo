@@ -1,72 +1,110 @@
-usuarios = {}
+productos = {
+    '8475HD': ['HP', 15.6, '8GB', 'DD', '1T', 'Intel Core i5', 'Nvidia GTX1050'],
+    '2175HD': ['lenovo', 14, '4GB', 'SSD', '512GB', 'Intel Core i5', 'Nvidia GTX1050'],
+    'JjfFHD': ['Asus', 14, '16GB', 'SSD', '256GB', 'Intel Core i7', 'Nvidia RTX2080Ti'],
+    'fgdxFHD': ['HP', 15.6, '8GB', 'DD', '1T', 'Intel Core i3', 'integrada'],
+    'GF75HD': ['Asus', 15.6, '8GB', 'DD', '1T', 'Intel Core i7', 'Nvidia GTX1050'],
+    '123FHD': ['lenovo', 14, '6GB', 'DD', '1T', 'AMD Ryzen 5', 'integrada'],
+    '342FHD': ['lenovo', 15.6, '8GB', 'DD', '1T', 'AMD Ryzen 7', 'Nvidia GTX1050'],
+    'UWU131HD': ['Dell', 15.6, '8GB', 'DD', '1T', 'AMD Ryzen 3', 'Nvidia GTX1050']
+}
 
-def contraseña_valida(codigo):
-    tiene_letras=False
-    tiene_numero=False
-    for c in codigo:
-        if c.isalpha():
-            tiene_letras = True
-        elif c.isdigit():
-            tiene_numero = True
-    if len(codigo) <= 8 and tiene_letras and tiene_numero:
-        return True
-    return False
+stock = {
+    '8475HD': [387990, 10],
+    '2175HD': [327990, 4],
+    'JjfFHD': [424990, 1],
+    'fgdxFHD': [664990, 21],
+    'GF75HD': [749990, 2],
+    '123FHD': [290890, 32],
+    '342FHD': [444990, 7],
+    'UWU131HD': [349990, 1]
+}
 
-def ingresar_usuario():
-    nombre=input("Ingrese un nombre:")
-    if nombre in usuarios:
-        print("Ya existe este usuario.") 
-        return
-    sexo=input("Ingrese su sexo  M o F (Masculino,Femenino):").strip()
-    if sexo not in ['M','F']:
-        print("Sexo no valido. Debe ser M o F.")
-        
+
+def stock_marca():
+    marca = input("Ingrese marca a consultar: ")
+    total = 0
+    for modelo in productos:
+        if productos[modelo][0].lower() == marca.lower():
+            total += stock[modelo][1]
+    print(f"El stock es: {total}")
+
+
+def busqueda_precio():
     while True:
-        codigo=input("Ingrese una contraseña de 8 caracteres(debe tener 1 letra y un digito numerico):").strip()
-        if contraseña_valida(codigo):
-           print("Codigo registrado exitosamente.")
-           usuarios[nombre]=[sexo,codigo]
-           break
-        else:
-              print("Codigo no valido. Debe tener 8 caracteres, al menos una letra y un digito numerico.")
+        try:
+            p_min = int(input("Ingrese precio mínimo: "))
+            p_max = int(input("Ingrese precio máximo: "))
+            break
+        except:
+            print("Debe ingresar valores enteros!!")
 
-def buscar_usuario():
-    nombre = input('Ingrese el nombre del usuario: ')
-    if nombre in usuarios:
-        datos = usuarios[nombre]
-        print(datos)
-        print(f" El sexo del Usuario es : {datos[0]}, Contraseña: {datos[1]}")
-    else:
-        print("Usuario no encontrado.")  
-def eliminar_usuario():
-    nombre = input("Ingrese el nombre:").strip()
-    if nombre in usuarios:
-        del usuarios[nombre]
-        print(f"Usuario eliminado {nombre}.")
-    else:
-        print("usuario no encontrado.")
+    resultados = []
+    for modelo in stock:
+        precio, cantidad = stock[modelo]
+        if p_min <= precio <= p_max and cantidad > 0:
+            marca = productos[modelo][0]
+            resultados.append(f"{marca}--{modelo}")
 
-def main():
+    
+    for i in range(len(resultados)):
+        for j in range(i + 1, len(resultados)):
+            if resultados[i] > resultados[j]:
+                resultados[i], resultados[j] = resultados[j], resultados[i]
+
+    if len(resultados) > 0:
+        print("Los notebooks entre los precios consultados son:", resultados)
+    else:
+        print("No hay notebooks en ese rango de precios.")
+
+
+def actualizar_precio():
+    def actualizar():
+        modelo = input("Ingrese modelo a actualizar: ")
+        try:
+            nuevo_precio = int(input("Ingrese precio nuevo: "))
+            if modelo in stock:
+                stock[modelo][0] = nuevo_precio 
+                print("Precio actualizado!!")
+            else:
+                print("El modelo no existe!!")
+        except:
+            print("Debe ingresar un precio válido.")
+
     while True:
-       
-        print('1. Ingresar Usuario')
-        print('2. Buscar Usuario')
-        print('3. Eliminar usuario')
-        print('4. Salir')
-       
-        opcion = input('Seleccione una opción: ')
+        actualizar()
+        repetir = input("Desea actualizar otro precio (s/n)?: ").lower()
+        if repetir != 's':
+            return
 
-        match opcion:
-            case '1':
-                ingresar_usuario()
-            case '2':
-                buscar_usuario()
-            case '3':
-                eliminar_usuario()
-            case'4':
-                print("Saliendo del programa.")
-                break
-            case default:
-                print("Opción no válida. Intente de nuevo.")
-if __name__ == "__main__":
-    main()
+
+def salir():
+    print("Programa finalizado.")
+    exit()
+
+
+def opcion_invalida():
+    print("Debe seleccionar una opción válida!!")
+
+
+def menu():
+    opciones = {
+        '1': stock_marca,
+        '2': busqueda_precio,
+        '3': actualizar_precio,
+        '4': salir
+    }
+
+    while True:
+        print("\n*** MENU PRINCIPAL ***")
+        print("1. Stock marca.")
+        print("2. Búsqueda por precio.")
+        print("3. Actualizar precio.")
+        print("4. Salir.")
+        opcion = input("Ingrese opción: ")
+
+        accion = opciones.get(opcion, opcion_invalida)
+        accion()
+
+
+menu()
